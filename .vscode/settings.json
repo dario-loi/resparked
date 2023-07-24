@@ -82,6 +82,7 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "glad.h": "c"
+        "glad.h": "c",
+        "regex": "cpp"
     }
 }
