@@ -166,8 +166,17 @@ else(NOT GLFW3_FOUND)
     list(APPEND LIBS ${GLFW3_LIBRARY})
 endif(NOT GLFW3_FOUND)
 
+# --------------------------------------
+#
+# Asset Importer Library
+#
+# --------------------------------------
 
+message("Configuring Assimp")
+find_package(assimp REQUIRED)
 
+list(APPEND LIBS ${assimp_LIBRARIES})
+list(APPEND PROJECT_HEADERS ${assimp_INCLUDE_DIRS})
 
 # --------------------------------------
 #
@@ -232,6 +241,7 @@ set(LOGURU_HEADERS
 )
 
 list(APPEND PROJECT_HEADERS ${LOGURU_HEADERS})
+list(APPEND LIBS loguru)
 
 add_library(loguru STATIC ${LOGURU_SRC} ${LOGURU_HEADERS})
 target_include_directories(loguru PUBLIC ${LOGURU_DIR})
@@ -249,13 +259,11 @@ set_target_properties(loguru PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_library(${LIB_NAME} SHARED ${LIB_SOURCES} ${PROJECT_HEADERS})
 target_include_directories(${LIB_NAME} PRIVATE ${INCLUDE_DIR} ${GLAD_DIR}/include ${GLFW3_INCLUDE_DIR} 
 ${IMGUI_DIR} ${IMGUI_DIR}/backends ${IMGUI_DIR}/misc/cpp ${LOGURU_DIR})
-target_link_libraries(${LIB_NAME} PRIVATE ${LIBS} imgui loguru ${LIBS})
-
-set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 
 # ----------- Link Libraries -----------
 
+target_link_libraries(${LIB_NAME} PRIVATE ${LIBS} imgui loguru ${LIBS})
+set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # --------------------------------------
 #
@@ -267,12 +275,10 @@ set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_executable(engine ${ENGINE_SOURCES} ${PROJECT_HEADERS})
 target_include_directories(engine PRIVATE ${INCLUDE_DIR})
 
-message("LIBS: ${LIBS}")
-
-target_link_libraries(engine PRIVATE ${LIBS} ${LIB_NAME} ${LIBS} imgui loguru)
 
 # ----------- Link Libraries -----------
 
+target_link_libraries(engine PRIVATE ${LIBS} ${LIB_NAME})
 
 # --------------------------------------
 #
