@@ -4,6 +4,10 @@
 #include <format>
 #include <random>
 #include <exception>
+#include <chrono>
+#include <concepts>
+#include <array>
+#include <algorithm>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,10 +15,19 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_stdlib.h"
 
 #include "loguru.hpp"
 
 namespace resparked {
+
+template <typename T, size_t S>
+struct ring_buffer {
+  std::array<T, S> buf;
+  size_t curr_idx{0};
+
+  void push(T element) { buf[(curr_idx++) % S] = element; }
+};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -82,14 +95,94 @@ engine::engine()
     }
 
 
+
     void engine::run() {
         // get current window
+
+        using namespace std::literals::string_literals;
+
+        // data for frametime statistics, 1kb~
+        ring_buffer<float, 128> ring;
+        std::array<float, 128> fps_arr;
 
         LOG_F(INFO, "Starting main loop");
 
         auto window = glfwGetCurrentContext();
+        auto context = entt::registry(); // spawn registry that holds all entities
+        auto lastTime = std::chrono::high_resolution_clock::now();
 
-        
+        for (;;) // continuously draw frames,
+        {
+            if (glfwWindowShouldClose(window)) {
+                break;
+            }
+
+            glfwPollEvents();
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            // get ImGui io context to query stuff such as resolution
+            ImGuiIO &io = ImGui::GetIO();
+
+            // get framebuf size for this frame
+            int frameWidth;
+            int frameHeight;
+            glfwGetWindowSize(window, &frameWidth, &frameHeight);
+
+            /*
+            
+                Frametime statistics BEGIN
+            
+            */
+
+            ImGui::Begin("Frames per second", nullptr);
+
+            ImGui::SetWindowSize({360, 80});
+            ImGui::SetWindowPos({frameWidth - 360 - 10, 10});
+
+            auto currTime = std::chrono::high_resolution_clock::now();
+
+            auto delta = currTime - lastTime;
+            auto frametime = std::chrono::duration<float>(delta).count();
+
+            ring.push(frametime);
+
+            auto avg = 0;
+            for (auto t : ring.buf) {
+                avg += t;
+            }
+            avg /= ring.buf.size();
+            lastTime = currTime;
+            std::transform(ring.buf.begin(), ring.buf.end(), fps_arr.begin(),
+                           [](float ft) { return 1 / (ft + 1e-9); });
+
+            ImGui::PlotLines(std::format("frametime {:.2f}ms\nfps: {:.2f}",
+                                         frametime, 1 / frametime)
+                                 .c_str(),
+                             fps_arr.data(), fps_arr.size(), 0, nullptr, 0.f,
+                             120.f);
+            ImGui::End();
+
+            /*
+            
+                Frametime statistics END
+            
+            */
+
+            ImGui::Render();
+
+            int display_w, display_h;
+            glfwGetFramebufferSize(window, &display_w, &display_h);
+            glViewport(0, 0, display_w, display_h);
+            glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwSwapBuffers(window);
+        }
     }
 
     void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height)

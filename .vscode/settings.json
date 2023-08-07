@@ -82,7 +82,8 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "glad.h": "c"
-    },
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+        "glad.h": "c",
+        "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+        "regex": "cpp"
+    }
 }
