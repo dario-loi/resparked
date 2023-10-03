@@ -9,6 +9,8 @@
 #include <iostream>
 #include <random>
 
+#include <btBulletDynamicsCommon.h>
+
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
