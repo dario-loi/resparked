@@ -1,0 +1,15 @@
+arguments: /home/dario/repos/resparked/build/engine
+Current dir: /home/dario/repos/resparked
+File verbosity level: 0
+date       time         ( uptime  ) [ thread name/id ]                   file:line     v| 
+2023-10-03 16:34:41.177 (   0.000s) [main thread     ]             loguru.cpp:770   INFO| Logging to 'resparked_engine.log', mode: 'w', verbosity: 0
+2023-10-03 16:34:41.177 (   0.000s) [main thread     ]          resparked.cpp:40    INFO| Initializing Engine
+2023-10-03 16:34:41.177 (   0.000s) [main thread     ]          resparked.cpp:41    INFO| Initializing GLFW3 Window
+2023-10-03 16:34:41.349 (   0.172s) [main thread     ]          resparked.cpp:71    INFO| GLFW3 Window initialized
+2023-10-03 16:34:41.349 (   0.172s) [main thread     ]          resparked.cpp:72    INFO| Initializing ImGUI backend
+2023-10-03 16:34:41.353 (   0.176s) [main thread     ]          resparked.cpp:84    INFO| ImGUI backend initialized
+2023-10-03 16:34:41.353 (   0.176s) [main thread     ]          resparked.cpp:111   INFO| Starting main loop
+2023-10-03 16:34:45.395 (   4.218s) [main thread     ]          resparked.cpp:89    INFO| Shutting down ImGUI backend
+2023-10-03 16:34:45.398 (   4.221s) [main thread     ]          resparked.cpp:95    INFO| Shutting down GLFW3 Window
+2023-10-03 16:34:45.433 (   4.256s) [main thread     ]          resparked.cpp:98    INFO| Engine terminated correctly
+2023-10-03 16:34:45.434 (   4.257s) [main thread     ]             loguru.cpp:485   INFO| atexit

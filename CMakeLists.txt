@@ -16,16 +16,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
-#set(CMAKE_CXX_CLANG_TIDY clang-tidy
-#    "-checks=bugprone-*,modernize-*,core-*,performance-*,readability-*,clang-analyzer-*,portability-*,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers"
-#    "-fix"
-#    "-header-filter=.*/include/.*"
-#)
-#set(CMAKE_CXX_CPPCHECK cppcheck "--enable=all" 
-#    "--suppress=missingIncludeSystem" 
-#    "--suppress=*:entt.hpp:*"
-#     # skip entt.hpp
-#) # You can customize the checks here
+# set(CMAKE_CXX_CLANG_TIDY clang-tidy
+# "-checks=bugprone-*,modernize-*,core-*,performance-*,readability-*,clang-analyzer-*,portability-*,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers"
+# "-fix"
+# "-header-filter=.*/include/.*"
+# )
+# set(CMAKE_CXX_CPPCHECK cppcheck "--enable=all"
+# "--suppress=missingIncludeSystem"
+# "--suppress=*:entt.hpp:*"
+# # skip entt.hpp
+# ) # You can customize the checks here
 
 # Set up the project
 set(ENGINE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/engine)
@@ -44,7 +44,6 @@ set(LIB_SOURCES ${SOURCE_DIR}/resparked.cpp)
 # GLAD
 #
 # --------------------------------------
-
 message("Configuring GLAD")
 set(GLAD_VERSION 0.1.34)
 
@@ -72,7 +71,6 @@ set_target_properties(glad PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(glad PROPERTIES LINKER_LANGUAGE C)
 
 # suppress warnings for glad
-
 set_target_properties(glad PROPERTIES CXX_CLANG_TIDY "")
 set_target_properties(glad PROPERTIES CXX_CPPCHECK "")
 
@@ -81,7 +79,6 @@ set_target_properties(glad PROPERTIES CXX_CPPCHECK "")
 # GLFW3 & OpenGL
 #
 # --------------------------------------
-
 message("Configuring GLFW3 and OpenGL")
 message("Will now attempt to find the required packages based on your system")
 message("Procedure is not tested on NT (Windows) and Apple systems.")
@@ -171,26 +168,28 @@ endif(NOT GLFW3_FOUND)
 # Asset Importer Library
 #
 # --------------------------------------
-
 message("Configuring Assimp")
 find_package(assimp REQUIRED)
 
 list(APPEND LIBS ${assimp_LIBRARIES})
 list(APPEND PROJECT_HEADERS ${assimp_INCLUDE_DIRS})
 
+# --------------------------------------
+#
+# StapleGL
+#
+# --------------------------------------
+set(STAPLEGL_VERSION 0.9.2)
+set(STAPLEGL_DIR ${VENDOR_DIR}/staplegl-${STAPLEGL_VERSION})
 
-# --------------------------------------
-#
-# 
-#
-# --------------------------------------
+list(APPEND PROJECT_HEADERS
+    ${STAPLEGL_DIR}/staplegl.hpp)
 
 # --------------------------------------
 #
 # ImGUI
 #
 # --------------------------------------
-
 set(IMGUI_VERSION 1.89.7)
 set(IMGUI_DIR ${VENDOR_DIR}/imgui-${IMGUI_VERSION})
 
@@ -228,13 +227,11 @@ target_link_libraries(imgui PUBLIC ${LIBS})
 
 set_target_properties(imgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-
 # --------------------------------------
 #
 # Loguru
 #
 # --------------------------------------
-
 set(LOGURU_VERSION 2.1.0)
 
 set(LOGURU_DIR ${VENDOR_DIR}/loguru-${LOGURU_VERSION})
@@ -253,7 +250,6 @@ list(APPEND LIBS loguru)
 add_library(loguru STATIC ${LOGURU_SRC} ${LOGURU_HEADERS})
 target_include_directories(loguru PUBLIC ${LOGURU_DIR})
 
-
 set_target_properties(loguru PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # --------------------------------------
@@ -264,11 +260,12 @@ set_target_properties(loguru PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # create our implementation library
 add_library(${LIB_NAME} SHARED ${LIB_SOURCES} ${PROJECT_HEADERS})
-target_include_directories(${LIB_NAME} PRIVATE ${INCLUDE_DIR} ${GLAD_DIR}/include ${GLFW3_INCLUDE_DIR} 
-${IMGUI_DIR} ${IMGUI_DIR}/backends ${IMGUI_DIR}/misc/cpp ${LOGURU_DIR})
+target_include_directories(${LIB_NAME} PRIVATE ${INCLUDE_DIR} ${GLAD_DIR}/include ${GLFW3_INCLUDE_DIR}
+    ${IMGUI_DIR} ${IMGUI_DIR}/backends ${IMGUI_DIR}/misc/cpp ${LOGURU_DIR} ${STAPLEGL_DIR})
+
+message(STATUS "Found staplegl version ${STAPLEGL_VERSION} at ${STAPLEGL_DIR}")
 
 # ----------- Link Libraries -----------
-
 target_link_libraries(${LIB_NAME} PRIVATE ${LIBS} imgui loguru ${LIBS})
 set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -280,11 +277,12 @@ set_target_properties(${LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Create the executable and link with the shared library
 add_executable(engine ${ENGINE_SOURCES} ${PROJECT_HEADERS})
-target_include_directories(engine PRIVATE ${INCLUDE_DIR})
+target_include_directories(engine PRIVATE ${INCLUDE_DIR} ${GLAD_DIR}/include ${GLFW3_INCLUDE_DIR}
+    ${IMGUI_DIR} ${IMGUI_DIR}/backends ${IMGUI_DIR}/misc/cpp ${LOGURU_DIR} ${STAPLEGL_DIR})
 
+message(STATUS "Included directories are: ${INCLUDE_DIR}")
 
 # ----------- Link Libraries -----------
-
 target_link_libraries(engine PRIVATE ${LIBS} ${LIB_NAME})
 
 # --------------------------------------
@@ -292,7 +290,6 @@ target_link_libraries(engine PRIVATE ${LIBS} ${LIB_NAME})
 # Custom targets
 #
 # --------------------------------------
-
 add_custom_target(cppcheck
     COMMAND ${CMAKE_CXX_CPPCHECK} ${ENGINE_SOURCES} ${PROJECT_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -309,44 +306,44 @@ option(BUILD_DOC " Build documentation " OFF)
 if(BUILD_DOC)
     # check if Doxygen is installed
     find_package(Doxygen)
+
     if(DOXYGEN_FOUND)
         # set input and output files
         set(DOXYFILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
         message(" Doxygen build started using ${DOXYFILE} ")
 
         # Copy the Doxyfile and the doxygen-custom folder to the build directory
-
-        add_custom_target(doxygen-custom 
+        add_custom_target(doxygen-custom
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-custom
             ${CMAKE_CURRENT_BINARY_DIR}/doxygen-custom
             COMMENT " Copying doxygen-custom to build directory "
             VERBATIM)
 
-        add_custom_target(doxygen-awesome-css 
+        add_custom_target(doxygen-awesome-css
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-awesome.css
             ${CMAKE_CURRENT_BINARY_DIR}/doxygen-awesome.css
             COMMENT " Copying doxygen-awesome.css to build directory "
             VERBATIM)
 
-        add_custom_target(Doxyfile 
+        add_custom_target(Doxyfile
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
             ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
             COMMENT " Copying Doxyfile to build directory "
             VERBATIM)
 
-        add_custom_target(build_docs 
+        add_custom_target(build_docs
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT " Generating API documentation with Doxygen "
             VERBATIM)
 
-        add_dependencies(build_docs 
-        Doxyfile 
-        doxygen-custom 
-        doxygen-awesome-css)
+        add_dependencies(build_docs
+            Doxyfile
+            doxygen-custom
+            doxygen-awesome-css)
     else(DOXYGEN_FOUND)
         message(" Doxygen need to be installed to generate the doxygen documentation ")
     endif(DOXYGEN_FOUND)
