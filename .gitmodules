@@ -1,3 +1,3 @@
-[submodule "vendor/glcore"]
-	path = vendor/glcore
-	url = https://github.com/dario-loi/glcore
+[submodule "vendor/staplegl"]
+	path = vendor/staplegl
+	url = https://github.com/dario-loi/staplegl

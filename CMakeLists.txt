@@ -178,6 +178,13 @@ find_package(assimp REQUIRED)
 list(APPEND LIBS ${assimp_LIBRARIES})
 list(APPEND PROJECT_HEADERS ${assimp_INCLUDE_DIRS})
 
+
+# --------------------------------------
+#
+# 
+#
+# --------------------------------------
+
 # --------------------------------------
 #
 # ImGUI
