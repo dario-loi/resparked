@@ -2,7 +2,8 @@
 #include "resparked.hpp"
 #include <iostream>
 
-auto main(int argc, char** argv) -> int {
+auto main(int argc, char** argv) -> int
+{
 
     loguru::init(argc, argv);
     loguru::add_file("resparked_engine.log", loguru::Truncate, loguru::Verbosity_INFO);
